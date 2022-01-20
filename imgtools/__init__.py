@@ -11,8 +11,13 @@ def create_app(test_config=None):
     if test_config:
         app.config.from_mapping(test_config)
 
-    from . import main
-    app.register_blueprint(main.bp)
+    from . import api
+    app.register_blueprint(api.bp)
+
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def catch_all(path):
+        return 'index.html'
 
     try:
         os.makedirs(app.instance_path)
