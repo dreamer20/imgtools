@@ -1,5 +1,6 @@
-import json
+import os
 import pytest
+from PIL import Image
 from io import BytesIO
 from imgtools import create_app
 from imgtools.api import withFileCheck
@@ -72,3 +73,19 @@ def test_withFileCheck_file_ext(app, client, ext):
     })
     assert response.status_code == 200
     assert b'good response' in response.data
+
+
+@pytest.mark.parametrize('direction', ['horizontally', 'vertically'])
+def test_reflect(client, direction, image_sample):
+    response = client.post('/api/reflect', data={
+        "image": (image_sample, "test.jpeg"),
+        "direction": direction
+    },)
+    bytes_io = BytesIO(response.data)
+
+    assert response.mimetype == 'image/jpeg'
+
+    with Image.open(bytes_io) as img:
+        img.save(os.path.join(
+            os.path.dirname(__file__), f'output/{direction}.jpg')
+        )
