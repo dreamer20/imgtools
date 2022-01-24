@@ -2,6 +2,7 @@ import os
 import pytest
 from PIL import Image
 from io import BytesIO
+from PIL import Image
 from imgtools import create_app
 from imgtools.api import withFileCheck
 
@@ -89,3 +90,96 @@ def test_reflect(client, direction, image_sample):
         img.save(os.path.join(
             os.path.dirname(__file__), f'output/{direction}.jpg')
         )
+
+
+resize_testData = [
+    (100, 100),
+    (500, 500),
+    (1, 1),
+    (1028, 1024),
+    (200, 500)
+]
+
+
+@pytest.mark.processing
+@pytest.mark.parametrize('width, height', resize_testData)
+def test_resize(client, image_sample, width, height):
+    response = client.post('/api/resize', data={
+        "image": (image_sample, "test1.jpg"),
+        "width": width,
+        "height": height
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    with Image.open(BytesIO(response.data)) as img:
+        img_name = (f'{test_resize.__name__}_{width}x{height}'
+                    f'_image.{img.format.lower()}')
+        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
+        img.save(img_path)
+
+
+@pytest.mark.processing
+@pytest.mark.parametrize('degree', [45, 90, 180, 270, 66])
+def test_rotate(client, image_sample, degree):
+    response = client.post('/api/rotate', data={
+        "image": (image_sample, "test1.jpg"),
+        "degree": degree,
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    with Image.open(BytesIO(response.data)) as img:
+        img_name = (f'{test_rotate.__name__}_{degree}'
+                    f'_image.{img.format.lower()}')
+        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
+        img.save(img_path)
+
+
+@pytest.mark.processing
+@pytest.mark.parametrize('filterName', ['BLUR', 'DETAIL'])
+def test_filter(client, image_sample, filterName):
+    response = client.post('/api/filter', data={
+        "image": (image_sample, "test1.jpg"),
+        "filterName": filterName,
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    with Image.open(BytesIO(response.data)) as img:
+        img_name = (f'{test_filter.__name__}_{filterName}'
+                    f'_image.{img.format.lower()}')
+        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
+        img.save(img_path)
+
+
+def test_filter_no_found(client, image_sample):
+    response = client.post('/api/filter', data={
+        "image": (image_sample, "test1.jpg"),
+        "filterName": 'somenofiltername',
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Операция не выполнима.'}
+
+
+@pytest.mark.test
+# @pytest.mark.parametrize('radius', [1, 2])
+def test_processing(client, image_sample, image_sample2):
+    response = client.post('/api/test', data={
+        "image": (image_sample, "test1.jpg"),
+        "image2": (image_sample2, "test2.jpg"),
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    with Image.open(BytesIO(response.data)) as img:
+        img_name = (f'{test_processing.__name__}_test'
+                    f'_image.{img.format.lower()}')
+        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
+        img.save(img_path)
