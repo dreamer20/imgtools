@@ -7,6 +7,13 @@ ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'gif', 'png'}
 bp = Blueprint('api', __name__, url_prefix='/api')
 
 
+@bp.after_request
+def after_request(response):
+    header = response.headers
+    header['Access-Control-Allow-Origin'] = '*'
+    return response
+
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
