@@ -2,9 +2,15 @@ import os
 import pytest
 from PIL import Image
 from io import BytesIO
-from PIL import Image
 from imgtools import create_app
 from imgtools.api import withFileCheck
+
+
+def save_as_image(file, func_name, image_name):
+    with Image.open(BytesIO(file)) as img:
+        img_name = (f'{func_name}_{image_name}.{img.format.lower()}')
+        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
+        img.save(img_path)
 
 
 def test_app():
@@ -58,6 +64,7 @@ def test_withFileCheck_errors(app, client, data, expected):
 
     response = client.post('/', data=data)
     json_data = response.get_json()
+
     assert response.status_code == expected['statusCode']
     assert json_data == expected['response']
 
@@ -72,6 +79,7 @@ def test_withFileCheck_file_ext(app, client, ext):
     response = client.post('/', data={
         "image": (BytesIO("file contents".encode("utf8")), f"test.{ext}")
     })
+
     assert response.status_code == 200
     assert b'good response' in response.data
 
@@ -82,14 +90,13 @@ def test_reflect(client, direction, image_sample):
         "image": (image_sample, "test.jpeg"),
         "direction": direction
     },)
-    bytes_io = BytesIO(response.data)
 
     assert response.mimetype == 'image/jpeg'
 
-    with Image.open(bytes_io) as img:
-        img.save(os.path.join(
-            os.path.dirname(__file__), f'output/{direction}.jpg')
-        )
+    save_as_image(
+        file=response.data,
+        func_name=test_reflect.__name__,
+        image_name=direction)
 
 
 resize_testData = [
@@ -101,7 +108,6 @@ resize_testData = [
 ]
 
 
-@pytest.mark.processing
 @pytest.mark.parametrize('width, height', resize_testData)
 def test_resize(client, image_sample, width, height):
     response = client.post('/api/resize', data={
@@ -113,14 +119,12 @@ def test_resize(client, image_sample, width, height):
     assert response.status_code == 200
     assert response.mimetype == 'image/jpeg'
 
-    with Image.open(BytesIO(response.data)) as img:
-        img_name = (f'{test_resize.__name__}_{width}x{height}'
-                    f'_image.{img.format.lower()}')
-        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
-        img.save(img_path)
+    save_as_image(
+        file=response.data,
+        func_name=test_resize.__name__,
+        image_name=f'{width}x{height}')
 
 
-@pytest.mark.processing
 @pytest.mark.parametrize('degree', [45, 90, 180, 270, 66])
 def test_rotate(client, image_sample, degree):
     response = client.post('/api/rotate', data={
@@ -131,14 +135,12 @@ def test_rotate(client, image_sample, degree):
     assert response.status_code == 200
     assert response.mimetype == 'image/jpeg'
 
-    with Image.open(BytesIO(response.data)) as img:
-        img_name = (f'{test_rotate.__name__}_{degree}'
-                    f'_image.{img.format.lower()}')
-        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
-        img.save(img_path)
+    save_as_image(
+        file=response.data,
+        func_name=test_rotate.__name__,
+        image_name=degree)
 
 
-@pytest.mark.processing
 @pytest.mark.parametrize('filterName', ['BLUR', 'DETAIL'])
 def test_filter(client, image_sample, filterName):
     response = client.post('/api/filter', data={
@@ -149,11 +151,10 @@ def test_filter(client, image_sample, filterName):
     assert response.status_code == 200
     assert response.mimetype == 'image/jpeg'
 
-    with Image.open(BytesIO(response.data)) as img:
-        img_name = (f'{test_filter.__name__}_{filterName}'
-                    f'_image.{img.format.lower()}')
-        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
-        img.save(img_path)
+    save_as_image(
+        file=response.data,
+        func_name=test_filter.__name__,
+        image_name=filterName)
 
 
 def test_filter_no_found(client, image_sample):
@@ -167,19 +168,18 @@ def test_filter_no_found(client, image_sample):
     assert json_data == {'error': 'Операция не выполнима.'}
 
 
-@pytest.mark.test
-# @pytest.mark.parametrize('radius', [1, 2])
-def test_processing(client, image_sample, image_sample2):
-    response = client.post('/api/test', data={
-        "image": (image_sample, "test1.jpg"),
-        "image2": (image_sample2, "test2.jpg"),
-    })
+# @pytest.mark.test
+# def test_processing(client, image_sample, image_sample2):
+#     response = client.post('/api/test', data={
+#         "image": (image_sample, "test1.jpg"),
+#         "image2": (image_sample2, "test2.jpg"),
+#     })
 
-    assert response.status_code == 200
-    assert response.mimetype == 'image/jpeg'
+#     assert response.status_code == 200
+#     assert response.mimetype == 'image/jpeg'
 
-    with Image.open(BytesIO(response.data)) as img:
-        img_name = (f'{test_processing.__name__}_test'
-                    f'_image.{img.format.lower()}')
-        img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
-        img.save(img_path)
+#     with Image.open(BytesIO(response.data)) as img:
+#         img_name = (f'{test_processing.__name__}_test'
+#                     f'_image.{img.format.lower()}')
+#         img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
+#         img.save(img_path)
