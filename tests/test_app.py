@@ -141,6 +141,20 @@ def test_rotate(client, image_sample, degree):
         image_name=degree)
 
 
+def test_invert(client, image_sample):
+    response = client.post('/api/invert', data={
+        "image": (image_sample, "test1.jpg"),
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_invert.__name__,
+        image_name='invert')
+
+
 @pytest.mark.parametrize('filterName', ['BLUR', 'DETAIL'])
 def test_filter(client, image_sample, filterName):
     response = client.post('/api/filter', data={
