@@ -296,6 +296,27 @@ def contrast():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
+@bp.route('/color', methods=['POST'])
+@withFileCheck
+def color():
+    file = request.files['image']
+
+    try:
+        factor = float(request.form['factor'])
+    except ValueError:
+        return jsonify({'error': 'Некорректное значение.'}), 400
+
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        enhancer = ImageEnhance.Color(img)
+        resultImg = enhancer.enhance(factor)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
 # @bp.route('/test', methods=['POST'])
 # @withFileCheck
 # def test():
