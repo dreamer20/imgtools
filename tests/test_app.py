@@ -6,9 +6,9 @@ from imgtools import create_app
 from imgtools.api import withFileCheck
 
 
-def save_as_image(file, func_name, image_name):
+def save_as_image(file, func_name, suffix=''):
     with Image.open(BytesIO(file)) as img:
-        img_name = (f'{func_name}_{image_name}.{img.format.lower()}')
+        img_name = (f'{func_name}_{suffix}.{img.format.lower()}')
         img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
         img.save(img_path)
 
@@ -96,7 +96,7 @@ def test_reflect(client, direction, image_sample):
     save_as_image(
         file=response.data,
         func_name=test_reflect.__name__,
-        image_name=direction)
+        suffix=direction)
 
 
 resize_testData = [
@@ -122,7 +122,7 @@ def test_resize(client, image_sample, width, height):
     save_as_image(
         file=response.data,
         func_name=test_resize.__name__,
-        image_name=f'{width}x{height}')
+        suffix=f'{width}x{height}')
 
 
 @pytest.mark.parametrize('degree', [45, 90, 180, 270, 66])
@@ -138,7 +138,7 @@ def test_rotate(client, image_sample, degree):
     save_as_image(
         file=response.data,
         func_name=test_rotate.__name__,
-        image_name=degree)
+        suffix=degree)
 
 
 def test_invert(client, image_sample):
@@ -152,7 +152,7 @@ def test_invert(client, image_sample):
     save_as_image(
         file=response.data,
         func_name=test_invert.__name__,
-        image_name='invert')
+        suffix='invert')
 
 
 @pytest.mark.parametrize('filterName', ['BLUR', 'DETAIL'])
@@ -168,7 +168,7 @@ def test_filter(client, image_sample, filterName):
     save_as_image(
         file=response.data,
         func_name=test_filter.__name__,
-        image_name=filterName)
+        suffix=filterName)
 
 
 @pytest.mark.parametrize('threshold', [0, 24, 64, 128, 256, -100])
@@ -184,7 +184,7 @@ def test_solarize(client, image_sample, threshold):
     save_as_image(
         file=response.data,
         func_name=test_solarize.__name__,
-        image_name=threshold)
+        suffix=threshold)
 
 
 @pytest.mark.parametrize('bits', [1, 2, '3', 4, '5', 6, 7, 8])
@@ -200,7 +200,7 @@ def test_posterize(client, image_sample, bits):
     save_as_image(
         file=response.data,
         func_name=test_posterize.__name__,
-        image_name=bits)
+        suffix=bits)
 
 
 test_borderData = [
@@ -229,7 +229,7 @@ def test_border(client, image_sample, border, fill):
     save_as_image(
         file=response.data,
         func_name=test_border.__name__,
-        image_name=f'{border}_{fill}')
+        suffix=f'{border}_{fill}')
 
 
 test_cropData = [
@@ -256,7 +256,7 @@ def test_crop(client, image_sample, border):
     save_as_image(
         file=response.data,
         func_name=test_crop.__name__,
-        image_name=f'{border}')
+        suffix=f'{border}')
 
 
 test_cropDataFails = [
@@ -315,7 +315,7 @@ def test_grayscale(client, image_sample):
     save_as_image(
         file=response.data,
         func_name=test_grayscale.__name__,
-        image_name='')
+    )
 
 
 @pytest.mark.parametrize('bits', ['string', '', -1, 0, 10])
@@ -352,7 +352,7 @@ def test_equalize(client, image_sample):
     save_as_image(
         file=response.data,
         func_name=test_equalize.__name__,
-        image_name='')
+    )
 
 
 def test_autocontrast(client, image_sample2):
@@ -366,7 +366,7 @@ def test_autocontrast(client, image_sample2):
     save_as_image(
         file=response.data,
         func_name=test_autocontrast.__name__,
-        image_name='')
+    )
 
 
 @pytest.mark.test
@@ -383,7 +383,7 @@ def test_contrast(client, image_sample2, factor):
     save_as_image(
         file=response.data,
         func_name=test_contrast.__name__,
-        image_name=factor)
+        suffix=factor)
 
 
 # @pytest.mark.test
@@ -399,4 +399,4 @@ def test_contrast(client, image_sample2, factor):
 #     save_as_image(
 #         file=response.data,
 #         func_name=test_processing.__name__,
-#         image_name='posterize')
+#         suffix='posterize')
