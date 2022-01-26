@@ -131,6 +131,29 @@ def solarize():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
+@bp.route('/posterize', methods=['POST'])
+@withFileCheck
+def posterize():
+    file = request.files['image']
+
+    try:
+        bits = int(request.form['bits'])
+    except ValueError:
+        return jsonify({'error': 'Некорректное значение.'}), 400
+
+    if bits not in range(1, 9):
+        return jsonify({'error': 'Некорректное значение.'}), 400
+
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        resultImg = ImageOps.posterize(img, bits)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
 @bp.route('/filter', methods=['POST'])
 @withFileCheck
 def applyFilter():

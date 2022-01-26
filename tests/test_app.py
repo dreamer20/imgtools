@@ -187,6 +187,35 @@ def test_solarize(client, image_sample, threshold):
         image_name=threshold)
 
 
+@pytest.mark.test
+@pytest.mark.parametrize('bits', [1, 2, '3', 4, '5', 6, 7, 8])
+def test_posterize(client, image_sample, bits):
+    response = client.post('/api/posterize', data={
+        "image": (image_sample, "test1.jpg"),
+        "bits": bits,
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_posterize.__name__,
+        image_name=bits)
+
+
+@pytest.mark.parametrize('bits', ['string', '', -1, 0, 10])
+def test_posterize_fails(client, image_sample, bits):
+    response = client.post('/api/posterize', data={
+        "image": (image_sample, "test1.jpg"),
+        "bits": bits,
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
 def test_filter_no_found(client, image_sample):
     response = client.post('/api/filter', data={
         "image": (image_sample, "test1.jpg"),
