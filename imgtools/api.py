@@ -275,25 +275,25 @@ def autocontrast():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
-# @bp.route('/contrast', methods=['POST'])
-# @withFileCheck
-# def contrast():
-#     file = request.files['image']
+@bp.route('/contrast', methods=['POST'])
+@withFileCheck
+def contrast():
+    file = request.files['image']
 
-#     try:
-#         factor = float(request.form['factor'])
-#     except ValueError:
-#         return jsonify({'error': 'Некорректное значение.'}), 400
+    try:
+        factor = float(request.form['factor'])
+    except ValueError:
+        return jsonify({'error': 'Некорректное значение.'}), 400
 
-#     bytes_io = BytesIO()
+    bytes_io = BytesIO()
 
-#     with Image.open(file) as img:
-#         enhancer = ImageEnhance.Contrast(img)
-#         resultImg = enhancer.enhance(factor)
-#         resultImg.save(bytes_io, format=img.format)
-#     bytes_io.seek(0)
+    with Image.open(file) as img:
+        enhancer = ImageEnhance.Contrast(img)
+        resultImg = enhancer.enhance(factor)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
 
-#     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
 # @bp.route('/test', methods=['POST'])
