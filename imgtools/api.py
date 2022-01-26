@@ -154,6 +154,20 @@ def posterize():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
+@bp.route('/grayscale', methods=['POST'])
+@withFileCheck
+def grayscale():
+    file = request.files['image']
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        resultImg = ImageOps.grayscale(img)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
 @bp.route('/filter', methods=['POST'])
 @withFileCheck
 def applyFilter():
