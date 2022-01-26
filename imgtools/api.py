@@ -194,6 +194,30 @@ def border():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
+@bp.route('/crop', methods=['POST'])
+@withFileCheck
+def crop():
+    file = request.files['image']
+
+    try:
+        border_left = int(request.form['border_left'])
+        border_top = int(request.form['border_top'])
+        border_right = int(request.form['border_right'])
+        border_bottom = int(request.form['border_bottom'])
+    except ValueError:
+        return jsonify({'error': 'Некорректное значение.'}), 400
+
+    border = (border_left, border_top, border_right, border_bottom)
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        resultImg = ImageOps.crop(img, border)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
 @bp.route('/filter', methods=['POST'])
 @withFileCheck
 def applyFilter():

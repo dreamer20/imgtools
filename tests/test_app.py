@@ -232,6 +232,54 @@ def test_border(client, image_sample, border, fill):
         image_name=f'{border}_{fill}')
 
 
+test_cropData = [
+    (0, 0, 0, 0),
+    (20, 20, 0, 0),
+    (0, 30, 0, 10),
+    ('10', '10', '10', '10')
+]
+
+
+@pytest.mark.parametrize('border', test_cropData)
+def test_crop(client, image_sample, border):
+    response = client.post('/api/crop', data={
+        "image": (image_sample, "test1.jpg"),
+        "border_left": border[0],
+        "border_top": border[1],
+        "border_right": border[2],
+        "border_bottom": border[3],
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_crop.__name__,
+        image_name=f'{border}')
+
+
+test_cropDataFails = [
+    ('', '', 0, 0),
+    (0, 30, 'asdf', 10),
+]
+
+
+@pytest.mark.parametrize('border', test_cropDataFails)
+def test_crop_fails(client, image_sample, border):
+    response = client.post('/api/crop', data={
+        "image": (image_sample, "test1.jpg"),
+        "border_left": border[0],
+        "border_top": border[1],
+        "border_right": border[2],
+        "border_bottom": border[3],
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
 test_borderDataFails = [
     ((0, 0, 0, 0), '000000'),
     (('dsaf', 1, 1, 1), '#000000'),
