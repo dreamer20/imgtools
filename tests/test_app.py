@@ -481,6 +481,56 @@ def test_sharpness_fails(client, image_sample2, factor):
     assert json_data == {'error': 'Некорректное значение.'}
 
 
+test_unsharpMaskData = [
+    (2, 150, 3),
+    (5, 200, 4),
+    (4, '100', '2'),
+    ('10', '250', '5'),
+]
+
+
+@pytest.mark.parametrize('radius, percent, threshold', test_unsharpMaskData)
+def test_unsharpMask(client, image_sample2, radius, percent, threshold):
+    response = client.post('/api/unsharp_mask', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'radius': radius,
+        'percent': percent,
+        'threshold': threshold
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_unsharpMask.__name__,
+        suffix=f'{radius}_{percent}_{threshold}')
+
+
+test_unsharpMaskFailsData = [
+    (2, 150, ''),
+    (5, '', 4),
+    ('124fd', '3gdsa', 4),
+]
+
+
+@pytest.mark.parametrize(
+    'radius, percent, threshold',
+    test_unsharpMaskFailsData
+)
+def test_unsharpMask_fails(client, image_sample2, radius, percent, threshold):
+    response = client.post('/api/unsharp_mask', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'radius': radius,
+        'percent': percent,
+        'threshold': threshold
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
 # @pytest.mark.test
 # def test_processing(client, image_sample):
 #     response = client.post('/api/test', data={

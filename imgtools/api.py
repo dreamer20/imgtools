@@ -359,6 +359,29 @@ def sharpness():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
+@bp.route('/unsharp_mask', methods=['POST'])
+@withFileCheck
+def unsharp_mask():
+    file = request.files['image']
+
+    try:
+        radius = int(request.form['radius'])
+        percent = int(request.form['percent'])
+        threshold = int(request.form['threshold'])
+    except ValueError:
+        return jsonify({'error': 'Некорректное значение.'}), 400
+
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        _filter = ImageFilter.UnsharpMask(radius, percent, threshold)
+        resultImg = img.filter(_filter)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
 # @bp.route('/test', methods=['POST'])
 # @withFileCheck
 # def test():
