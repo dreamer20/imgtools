@@ -203,6 +203,59 @@ def test_posterize(client, image_sample, bits):
         image_name=bits)
 
 
+test_borderData = [
+    ((0, 0, 0, 0), '#000000'),
+    ((1, 1, 1, 1), '#000000'),
+    ((2, 2, '3', '2'), '#000000'),
+    ((100, 100, 100, 100), '#000000'),
+    ((1000, 1000, 1000, 1000), '#00ff00'),
+]
+
+
+@pytest.mark.parametrize('border, fill', test_borderData)
+def test_border(client, image_sample, border, fill):
+    response = client.post('/api/border', data={
+        "image": (image_sample, "test1.jpg"),
+        "border_left": border[0],
+        "border_top": border[1],
+        "border_right": border[2],
+        "border_bottom": border[3],
+        "fill": fill,
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_border.__name__,
+        image_name=f'{border}_{fill}')
+
+
+test_borderDataFails = [
+    ((0, 0, 0, 0), '000000'),
+    (('dsaf', 1, 1, 1), '#000000'),
+    ((1, 1, 1, 1), 'dsgdfsd'),
+    ((100, 100, 100, 100), '#00'),
+]
+
+
+@pytest.mark.parametrize('border, fill', test_borderDataFails)
+def test_border_fails(client, image_sample, border, fill):
+    response = client.post('/api/border', data={
+        "image": (image_sample, "test1.jpg"),
+        "border_left": border[0],
+        "border_top": border[1],
+        "border_right": border[2],
+        "border_bottom": border[3],
+        "fill": fill,
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
 def test_grayscale(client, image_sample):
     response = client.post('/api/grayscale', data={
         "image": (image_sample, "test1.jpg"),

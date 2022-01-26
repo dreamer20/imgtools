@@ -1,4 +1,4 @@
-from PIL import Image, ImageFilter, ImageOps
+from PIL import Image, ImageFilter, ImageOps, ImageColor
 from io import BytesIO
 from flask import Blueprint, request, jsonify, send_file
 
@@ -162,6 +162,32 @@ def grayscale():
 
     with Image.open(file) as img:
         resultImg = ImageOps.grayscale(img)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
+@bp.route('/border', methods=['POST'])
+@withFileCheck
+def border():
+    file = request.files['image']
+    fill = request.form['fill']
+
+    try:
+        fill = ImageColor.getrgb(fill)
+        border_left = int(request.form['border_left'])
+        border_top = int(request.form['border_top'])
+        border_right = int(request.form['border_right'])
+        border_bottom = int(request.form['border_bottom'])
+    except ValueError:
+        return jsonify({'error': 'Некорректное значение.'}), 400
+
+    border = (border_left, border_top, border_right, border_bottom)
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        resultImg = ImageOps.expand(img, border, fill)
         resultImg.save(bytes_io, format=img.format)
     bytes_io.seek(0)
 
