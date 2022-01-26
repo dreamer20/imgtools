@@ -116,6 +116,21 @@ def invert():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
+@bp.route('/solarize', methods=['POST'])
+@withFileCheck
+def solarize():
+    file = request.files['image']
+    threshold = int(request.form['threshold'])
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        resultImg = ImageOps.solarize(img, threshold)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
 @bp.route('/filter', methods=['POST'])
 @withFileCheck
 def applyFilter():
@@ -138,15 +153,16 @@ def applyFilter():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
-@bp.route('/test', methods=['POST'])
-@withFileCheck
-def test():
-    file = request.files['image']
-    bytes_io = BytesIO()
+# @bp.route('/test', methods=['POST'])
+# @withFileCheck
+# def test():
+#     file = request.files['image']
+#     bytes_io = BytesIO()
 
-    with Image.open(file) as img:
-        resultImg = ImageOps.invert(img)
-        resultImg.save(bytes_io, format=img.format)
-    bytes_io.seek(0)
+#     with Image.open(file) as img:
+#         resultImg = ImageOps.convert(img, deformer)  # Постеризация 
+#         resultImg = img.convert('CMYK')
+#         resultImg.save(bytes_io, format=img.format)
+#     bytes_io.seek(0)
 
-    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+#     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')

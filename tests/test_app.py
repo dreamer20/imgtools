@@ -171,6 +171,22 @@ def test_filter(client, image_sample, filterName):
         image_name=filterName)
 
 
+@pytest.mark.parametrize('threshold', [0, 24, 64, 128, 256, -100])
+def test_solarize(client, image_sample, threshold):
+    response = client.post('/api/solarize', data={
+        "image": (image_sample, "test1.jpg"),
+        "threshold": threshold,
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_solarize.__name__,
+        image_name=threshold)
+
+
 def test_filter_no_found(client, image_sample):
     response = client.post('/api/filter', data={
         "image": (image_sample, "test1.jpg"),
@@ -183,17 +199,16 @@ def test_filter_no_found(client, image_sample):
 
 
 # @pytest.mark.test
-# def test_processing(client, image_sample, image_sample2):
+# def test_processing(client, image_sample):
 #     response = client.post('/api/test', data={
 #         "image": (image_sample, "test1.jpg"),
-#         "image2": (image_sample2, "test2.jpg"),
+#         # "image2": (image_sample2, "test2.jpg"),
 #     })
 
 #     assert response.status_code == 200
 #     assert response.mimetype == 'image/jpeg'
 
-#     with Image.open(BytesIO(response.data)) as img:
-#         img_name = (f'{test_processing.__name__}_test'
-#                     f'_image.{img.format.lower()}')
-#         img_path = os.path.join(os.path.dirname(__file__), 'output', img_name)
-#         img.save(img_path)
+#     save_as_image(
+#         file=response.data,
+#         func_name=test_processing.__name__,
+#         image_name='posterize')
