@@ -453,6 +453,34 @@ def test_brightness_fails(client, image_sample2, factor):
     assert json_data == {'error': 'Некорректное значение.'}
 
 
+@pytest.mark.parametrize('factor', [0.0, 0.2, 1.0, 1.1, 2.0])
+def test_sharpness(client, image_sample2, factor):
+    response = client.post('/api/sharpness', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'factor': factor
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_sharpness.__name__,
+        suffix=factor)
+
+
+@pytest.mark.parametrize('factor', ['31sd', ''])
+def test_sharpness_fails(client, image_sample2, factor):
+    response = client.post('/api/sharpness', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'factor': factor
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
 # @pytest.mark.test
 # def test_processing(client, image_sample):
 #     response = client.post('/api/test', data={
