@@ -293,6 +293,20 @@ def test_filter_no_found(client, image_sample):
     assert json_data == {'error': 'Операция не выполнима.'}
 
 
+def test_equalize(client, image_sample):
+    response = client.post('/api/equalize', data={
+        "image": (image_sample, "test1.jpg"),
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_equalize.__name__,
+        image_name='')
+
+
 # @pytest.mark.test
 # def test_processing(client, image_sample):
 #     response = client.post('/api/test', data={

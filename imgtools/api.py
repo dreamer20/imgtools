@@ -216,6 +216,20 @@ def applyFilter():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
+@bp.route('/equalize', methods=['POST'])
+@withFileCheck
+def equalize():
+    file = request.files['image']
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        resultImg = ImageOps.equalize(img)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
 # @bp.route('/test', methods=['POST'])
 # @withFileCheck
 # def test():
