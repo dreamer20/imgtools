@@ -369,7 +369,6 @@ def test_autocontrast(client, image_sample2):
     )
 
 
-@pytest.mark.test
 @pytest.mark.parametrize('factor', [0.1, 0.4, 1.0, 1.1, 2.0])
 def test_contrast(client, image_sample2, factor):
     response = client.post('/api/contrast', data={
@@ -398,7 +397,6 @@ def test_contrast_fails(client, image_sample2, factor):
     assert json_data == {'error': 'Некорректное значение.'}
 
 
-@pytest.mark.test
 @pytest.mark.parametrize('factor', [0.0, 0.2, 1.0, 1.1, 2.0])
 def test_color(client, image_sample2, factor):
     response = client.post('/api/color', data={
@@ -415,10 +413,37 @@ def test_color(client, image_sample2, factor):
         suffix=factor)
 
 
-@pytest.mark.test
 @pytest.mark.parametrize('factor', ['asdf', ''])
 def test_color_fails(client, image_sample2, factor):
     response = client.post('/api/contrast', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'factor': factor
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
+@pytest.mark.parametrize('factor', [0.0, 0.2, 1.0, 1.1, 2.0])
+def test_brightness(client, image_sample2, factor):
+    response = client.post('/api/brightness', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'factor': factor
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_brightness.__name__,
+        suffix=factor)
+
+
+@pytest.mark.parametrize('factor', ['asdf', ''])
+def test_brightness_fails(client, image_sample2, factor):
+    response = client.post('/api/brightness', data={
         'image': (image_sample2, 'test1.jpg'),
         'factor': factor
     })
