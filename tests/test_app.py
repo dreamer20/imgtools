@@ -386,6 +386,18 @@ def test_contrast(client, image_sample2, factor):
         suffix=factor)
 
 
+@pytest.mark.parametrize('factor', ['asdf', ''])
+def test_contrast_fails(client, image_sample2, factor):
+    response = client.post('/api/contrast', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'factor': factor
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
 # @pytest.mark.test
 # def test_processing(client, image_sample):
 #     response = client.post('/api/test', data={
