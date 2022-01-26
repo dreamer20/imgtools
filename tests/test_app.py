@@ -355,6 +355,37 @@ def test_equalize(client, image_sample):
         image_name='')
 
 
+def test_autocontrast(client, image_sample2):
+    response = client.post('/api/autocontrast', data={
+        'image': (image_sample2, "test1.jpg"),
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_autocontrast.__name__,
+        image_name='')
+
+
+# @pytest.mark.test
+# @pytest.mark.parametrize('factor', [0.1, 0.4, 1.0, 1.1, 2.0])
+# def test_contrast(client, image_sample2, factor):
+#     response = client.post('/api/contrast', data={
+#         'image': (image_sample2, 'test1.jpg'),
+#         'factor': factor
+#     })
+
+#     assert response.status_code == 200
+#     assert response.mimetype == 'image/jpeg'
+
+#     save_as_image(
+#         file=response.data,
+#         func_name=test_contrast.__name__,
+#         image_name=factor)
+
+
 # @pytest.mark.test
 # def test_processing(client, image_sample):
 #     response = client.post('/api/test', data={

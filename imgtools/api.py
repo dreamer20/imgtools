@@ -1,4 +1,10 @@
-from PIL import Image, ImageFilter, ImageOps, ImageColor
+from PIL import (
+    Image,
+    ImageFilter,
+    ImageOps,
+    ImageColor,
+    ImageEnhance
+)
 from io import BytesIO
 from flask import Blueprint, request, jsonify, send_file
 
@@ -252,6 +258,42 @@ def equalize():
     bytes_io.seek(0)
 
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
+@bp.route('/autocontrast', methods=['POST'])
+@withFileCheck
+def autocontrast():
+    file = request.files['image']
+
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        resultImg = ImageOps.autocontrast(img)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
+# @bp.route('/contrast', methods=['POST'])
+# @withFileCheck
+# def contrast():
+#     file = request.files['image']
+
+#     try:
+#         factor = float(request.form['factor'])
+#     except ValueError:
+#         return jsonify({'error': 'Некорректное значение.'}), 400
+
+#     bytes_io = BytesIO()
+
+#     with Image.open(file) as img:
+#         enhancer = ImageEnhance.Contrast(img)
+#         resultImg = enhancer.enhance(factor)
+#         resultImg.save(bytes_io, format=img.format)
+#     bytes_io.seek(0)
+
+#     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
 # @bp.route('/test', methods=['POST'])
