@@ -382,6 +382,48 @@ def unsharp_mask():
     return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
 
 
+@bp.route('/box_blur', methods=['POST'])
+@withFileCheck
+def box_blur():
+    file = request.files['image']
+
+    try:
+        radius = int(request.form['radius'])
+    except ValueError:
+        return jsonify({'error': 'Некорректное значение.'}), 400
+
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        _filter = ImageFilter.BoxBlur(radius)
+        resultImg = img.filter(_filter)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
+@bp.route('/gaussian_blur', methods=['POST'])
+@withFileCheck
+def gaussian_blur():
+    file = request.files['image']
+
+    try:
+        radius = int(request.form['radius'])
+    except ValueError:
+        return jsonify({'error': 'Некорректное значение.'}), 400
+
+    bytes_io = BytesIO()
+
+    with Image.open(file) as img:
+        _filter = ImageFilter.GaussianBlur(radius)
+        resultImg = img.filter(_filter)
+        resultImg.save(bytes_io, format=img.format)
+    bytes_io.seek(0)
+
+    return send_file(bytes_io, mimetype=f'image/{img.format.lower()}')
+
+
 # @bp.route('/test', methods=['POST'])
 # @withFileCheck
 # def test():

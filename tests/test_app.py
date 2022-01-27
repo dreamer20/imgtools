@@ -531,6 +531,64 @@ def test_unsharpMask_fails(client, image_sample2, radius, percent, threshold):
     assert json_data == {'error': 'Некорректное значение.'}
 
 
+@pytest.mark.parametrize('radius', [0, 1, 2, '5', '10', 100])
+def test_boxBlur(client, image_sample2, radius):
+    response = client.post('/api/box_blur', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'radius': radius,
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_boxBlur.__name__,
+        suffix=radius)
+
+
+@pytest.mark.parametrize('radius', ['', 'adfae'])
+def test_boxBlur_fails(client, image_sample2, radius):
+    response = client.post('/api/box_blur', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'radius': radius,
+    })
+
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
+@pytest.mark.parametrize('radius', [0, 1, 2, '5', '10', 100])
+def test_gaussianBlur(client, image_sample2, radius):
+    response = client.post('/api/gaussian_blur', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'radius': radius,
+    })
+
+    assert response.status_code == 200
+    assert response.mimetype == 'image/jpeg'
+
+    save_as_image(
+        file=response.data,
+        func_name=test_gaussianBlur.__name__,
+        suffix=radius)
+
+
+@pytest.mark.parametrize('radius', ['', 'adfae'])
+def test_gaussianBlur_fails(client, image_sample2, radius):
+    response = client.post('/api/gaussian_blur', data={
+        'image': (image_sample2, 'test1.jpg'),
+        'radius': radius,
+    })
+
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
+
+
 # @pytest.mark.test
 # def test_processing(client, image_sample):
 #     response = client.post('/api/test', data={
