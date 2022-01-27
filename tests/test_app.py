@@ -155,10 +155,23 @@ def test_invert(client, image_sample):
         suffix='invert')
 
 
-@pytest.mark.parametrize('filterName', ['BLUR', 'DETAIL'])
-def test_filter(client, image_sample, filterName):
+test_filterData = [
+    'CONTOUR',  # Контур
+    'DETAIL',  # Уточнение
+    'EDGE_ENHANCE',  # Уточнить край
+    'EDGE_ENHANCE_MORE',
+    'EMBOSS',  # Тиснение
+    'FIND_EDGES',  # Выделение краев
+    'SMOOTH',  # Сгладить
+    'SMOOTH_MORE'
+]
+
+
+@pytest.mark.test
+@pytest.mark.parametrize('filterName', test_filterData)
+def test_filter(client, image_sample2, filterName):
     response = client.post('/api/filter', data={
-        "image": (image_sample, "test1.jpg"),
+        "image": (image_sample2, "test1.jpg"),
         "filterName": filterName,
     })
 
@@ -169,6 +182,18 @@ def test_filter(client, image_sample, filterName):
         file=response.data,
         func_name=test_filter.__name__,
         suffix=filterName)
+
+
+@pytest.mark.parametrize('filterName', ['asdfa', '', 214])
+def test_filter_fails(client, image_sample, filterName):
+    response = client.post('/api/filter', data={
+        "image": (image_sample, "test1.jpg"),
+        "filterName": filterName,
+    })
+    json_data = response.get_json()
+
+    assert response.status_code == 400
+    assert json_data == {'error': 'Некорректное значение.'}
 
 
 @pytest.mark.parametrize('threshold', [0, 24, 64, 128, 256, -100])

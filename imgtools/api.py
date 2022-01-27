@@ -230,8 +230,14 @@ def applyFilter():
     file = request.files['image']
     filterName = request.form['filterName']
     imageFilters = (
-        'BLUR',
-        'DETAIL'
+        'CONTOUR',
+        'DETAIL',
+        'EDGE_ENHANCE',
+        'EDGE_ENHANCE_MORE',
+        'EMBOSS',
+        'FIND_EDGES',
+        'SMOOTH',
+        'SMOOTH_MORE'
     )
     bytes_io = BytesIO()
 
@@ -239,7 +245,7 @@ def applyFilter():
         if (filterName in imageFilters):
             resultImg = img.filter(getattr(ImageFilter, filterName))
         else:
-            return jsonify({'error': 'Операция не выполнима.'}), 400
+            return jsonify({'error': 'Некорректное значение.'}), 400
         resultImg.save(bytes_io, format=img.format)
     bytes_io.seek(0)
 
